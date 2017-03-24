@@ -17,7 +17,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 	
 	public CrazyCalculator(){
 		super("Crazy Calculator");
-		Image image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("CalcIcon.jpeg"));
+		Image image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("CalcIcon.jpg"));
 		ImageIcon icon = new ImageIcon(image);
 		setIconImage(icon.getImage());
 		setLayout(new BorderLayout());
@@ -388,6 +388,11 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 						area.append(str);
 					}else if(postfix.get(i).equals("/")){
 						double divisor = numbers.pop(), dividend = numbers.pop();
+						if(divisor == 0.0) {
+							str = "Error Occurred!";
+							area.append(str);
+							return "Error!";
+						}
 						number = dividend/divisor;
 						//str = dividend + " / " + divisor + " = " + number + "\n";
 						str = "Popped " + divisor + " and " + dividend + " then divide. Result: " + number + "\n";
