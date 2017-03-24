@@ -17,8 +17,4 @@ public class PseudoLink <T> {
 	public void setKey(T key){
 		this.key = key;
 	}
-	
-	/*public Link getNext(){
-		return next;
-	}*/
 }

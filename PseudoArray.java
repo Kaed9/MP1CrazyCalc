@@ -1,11 +1,3 @@
-/*
- final size to implement the limitations of usual array (static size)
- 
- add(T element) : adds element at the last
- add(int index, T element) : adds(actually assigns) "element" at the index'th element of the list //like array[index] = element;
- get(int index) : maaram na kamo hito hahahaha
- size() : return size of array, not the number of elements at the moment
-*/
 public class PseudoArray <T>{
 	private PseudoLinkedList<T> keys;
 	private final int size;
@@ -23,7 +15,7 @@ public class PseudoArray <T>{
 		ctr = 0;
 	}
 	
-	public boolean add(T element){// adds element to the last added part
+	public boolean add(T element){
 		if(ctr >= size){
 			throw new ArrayIndexOutOfBoundsException();
 		}else{
