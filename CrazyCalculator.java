@@ -5,7 +5,7 @@ import java.util.EmptyStackException;
 
 public class CrazyCalculator extends JFrame implements ActionListener{
 	private JPanel whole, north, south, east, west;
-	private JPanel field, center, numbers, numbers1, numbers2;
+	private JPanel field, center, numbers;
 	private JButton[] num = new JButton[20];
 	private JTextField text;
 	private JScrollBar textScrollBar;
@@ -13,25 +13,28 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 	private String op = "", str = "";
 	private Timer timer = new Timer(1, this);
 	private boolean activeWindow;
-	private Color background = new Color(122,122,122), digitButtons = new Color(200,200,200), operatorColor = new Color(255,161,0);
-	
+	private Color background = new Color(220,220,220), digitColor= new Color(140, 110, 100), operatorColor = new Color(82, 182, 172);
+
 	public CrazyCalculator(){
 		super("Crazy Calculator");
 		Image image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("CalcIcon.jpg"));
 		ImageIcon icon = new ImageIcon(image);
 		setIconImage(icon.getImage());
 		setLayout(new BorderLayout());
-		
+
 		whole = new JPanel();
 		whole.setLayout(new BorderLayout(5, 5));
-		
+
 		field = new JPanel();
-		field.setLayout(new GridLayout(2, 1));
-		
+		field.setLayout(new GridLayout(2,1));
+
 		text = new JTextField(77);
-		text.setFont(new Font("Courier New", Font.BOLD, 20));
-		text.setBackground(background);
-		text.setForeground(Color.WHITE);
+		text.setFont(new Font("Helvetica", Font.BOLD, 20));
+		text.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+	    
+		
+		text.setBackground(new Color(245,245,245));
+		text.setForeground(digitColor);
 		text.setHorizontalAlignment(SwingConstants.RIGHT);
 		text.setEditable(false);
 		textScrollBar = new JScrollBar(JScrollBar.HORIZONTAL);
@@ -41,15 +44,15 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		field.add(text);
 		field.add(textScrollBar);
 		field.setBackground(background);
-		
+		System.out.println("" + textScrollBar.getUI());
+
 		center = new JPanel();
 		center.setLayout(new GridLayout(1, 1, 15, 15));
-		
+
+
 		GridBagLayout gridbag = new GridBagLayout();
 		numbers = new JPanel(gridbag);
 		GridBagConstraints constraint = new GridBagConstraints();
-		numbers.setBackground(background);
-		
 		constraint.fill = GridBagConstraints.HORIZONTAL;
 		constraint.weightx = 1.0;
 		constraint.weighty = 1.0;
@@ -57,20 +60,29 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		constraint.ipady = 50;
 		for(int i = 0; i < 20; i++) {
 			num[i] = new JButton();
-			num[i].setFont(new Font("Courier New", Font.BOLD, 18));
+			num[i].setFont(new Font("Helvetica", Font.PLAIN, 18));
 			constraint.gridx = i%5;
 			constraint.gridy = (int)((float)i/5.00);
 			if(i == 15){
 				num[++i] = new JButton();
-				num[i].setFont(new Font("Courier New", Font.BOLD, 18));
+				num[i].setFont(new Font("Helvetica", Font.PLAIN, 18));
+				
 				constraint.gridwidth = 2;
 				numbers.add(num[i], constraint);
 				constraint.gridwidth = 1;
 			}else{
 				numbers.add(num[i], constraint);
 			}
+		} 
+		
+		for(int i = 0; i < 20; i++)
+		{
+			num[i].setBorder(javax.swing.BorderFactory.createLineBorder(Color.WHITE));
 		}
 		
+		
+		
+		num[18].setFont(new Font("Helvetica", Font.PLAIN, 14));
 		num[0].setText("7");
 		num[1].setText("8");
 		num[2].setText("9");
@@ -88,53 +100,64 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		num[14].setText("+");
 		num[15].setEnabled(false);
 		num[16].setText("0");
-		num[17].setText("<=");
-		num[18].setText("C");
+		num[17].setText("C");
+		num[18].setText("DEL");
 		num[19].setText("=");
 		
 		for(int i = 0; i < 20; i++){
 			try{
+				num[i].setBackground(operatorColor);
+				num[i].setForeground(Color.WHITE);
+			}catch(NumberFormatException e){
+				num[i].setBackground(digitColor);
+				num[i].setForeground(Color.WHITE);
+			}
+		}
+		
+		for(int i = 0; i < 20; i++){
+			try{
 				int number = Integer.parseInt(num[i].getText());
-				num[i].setBackground(digitButtons);
+				num[i].setBackground(digitColor);
+				num[i].setForeground(Color.WHITE);
 			}catch(NumberFormatException e){
 				num[i].setBackground(operatorColor);
+				num[i].setForeground(Color.WHITE);
 			}
 		}
 		center.add(numbers);
-		
+
 		whole.add(field, BorderLayout.NORTH);
 		whole.add(center, BorderLayout.CENTER);
-		
+
 		north = new JPanel();
 		south = new JPanel();
 		east = new JPanel();
 		west = new JPanel();
-		
-		area = new JTextArea(10, 69);
-		area.setFont(new Font("Courier New", Font.BOLD, 12));
-		area.setBackground(background);
-		area.setForeground(Color.WHITE);
+
+		area = new JTextArea(10, 43);
+		area.setBackground(new Color(245, 245, 245));
+		area.setForeground(digitColor);
 		area.setEditable(false);
 		south.add(new JScrollPane(area), BorderLayout.CENTER);
-		
+
 		add(north, BorderLayout.NORTH);
 		add(south, BorderLayout.SOUTH);
 		add(east, BorderLayout.EAST);
 		add(west, BorderLayout.WEST);
 		add(whole, BorderLayout.CENTER);
-		
+
 		north.setBackground(background);
 		south.setBackground(background);
 		east.setBackground(background);
 		west.setBackground(background);
 		whole.setBackground(background);
-		
+
 		setVisible(true);
 		activeWindow = true;
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		setSize(500, 550);
+		setSize(500,500);
 		setResizable(false);
-		
+
 		for(int j = 0; j < 20; j++) {
 			num[j].addActionListener(this);
 		}
@@ -148,8 +171,10 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 				activeWindow = false;
 			}
 		});
+		repaint();
+		revalidate();
 	}
-	
+
 	public void actionPerformed(ActionEvent event) {
 		if(event.getSource() == timer && activeWindow){
 			whole.requestFocus();
@@ -169,14 +194,13 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 					text.setText(op);
 					op = "";
 					break;
-				} else if(num[i].getText() == "<=") {
+				} else if(num[i].getText() == "DEL") {
 					String screenText = text.getText();
-					screenText = op;
 					System.out.println("|" + screenText + "|");
 					if(screenText.trim().equals("Error!")){
 						screenText = "";
 					}else if(screenText.length() == 0){
-						
+
 					}else{
 						for(int j = 0; j < screenText.length(); j++){
 							if(screenText.charAt(j) == '\n'){
@@ -195,13 +219,13 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 				}
 			}
 		}
-		if(text.getText().trim().length()>67){
+		if(text.getText().trim().length()>42){
 			textScrollBar.setVisible(true);
 		}else{
 			textScrollBar.setVisible(false);
 		}
 	}
-	
+
 	private class KeyReader extends KeyAdapter{
 		public void keyPressed(KeyEvent e){
 			String pressed = String.valueOf(e.getKeyChar());
@@ -213,11 +237,10 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 				op = "";
 			} else if(e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
 				String screenText = text.getText();
-				screenText = op;
 				if(screenText.trim().equals("Error!")){
 					screenText = "";
 				}else if(screenText.length() == 0){
-					
+
 				}else{
 					for(int j = 0; j < screenText.length(); j++){
 						if(screenText.charAt(j) == '\n'){
@@ -239,7 +262,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 					text.setText(op);
 				}
 			}
-			if(text.getText().trim().length()>67){
+			if(text.getText().trim().length()> 42){
 				textScrollBar.setVisible(true);
 			}else{
 				textScrollBar.setVisible(false);
