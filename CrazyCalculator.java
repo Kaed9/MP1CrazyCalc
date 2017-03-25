@@ -1,14 +1,12 @@
-/*
-	insterted part outside functions, lines 15 to 19 and lines 124 to 163.
-*/
 import javax.swing.*;
+import javax.swing.plaf.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.EmptyStackException;
 
 public class CrazyCalculator extends JFrame implements ActionListener{
 	private JPanel whole, north, south, east, west;
-	private JPanel field, center, numbers, numbers1, numbers2;
+	private JPanel field, center, numbers;
 	private JButton[] num = new JButton[20];
 	private JTextField text;
 	private JScrollBar textScrollBar;
@@ -20,46 +18,47 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 	private String op = "", str = "";
 	private Timer timer = new Timer(1, this);
 	private boolean activeWindow;
-	private Color background = new Color(122,122,122), digitButtons = new Color(200,200,200), operatorColor = new Color(255,161,0);
-	
+	private Color background = new Color(220,220,220), digitColor= new Color(140, 110, 100), operatorColor = new Color(82, 182, 172);
+
 	public CrazyCalculator(){
 		super("Crazy Calculator");
-		Image image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("CalcIcon.png"));
+		Image image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("CalcIcon.jpg"));
 		ImageIcon icon = new ImageIcon(image);
 		setIconImage(icon.getImage());
 		setLayout(new BorderLayout());
-		
+
 		whole = new JPanel();
 		whole.setLayout(new BorderLayout(5, 5));
-		
+
 		field = new JPanel();
-		field.setLayout(new GridLayout(2, 1));
-		
+		field.setLayout(new BorderLayout());
+
 		text = new JTextField(77);
-		text.setFont(new Font("Courier New", Font.BOLD, 18));
-		text.setBackground(background);
-		text.setForeground(Color.WHITE);
+		text.setFont(new Font("Helvetica", Font.BOLD, 20));
+		text.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+	    
+		
+		text.setBackground(new Color(245,245,245));
+		text.setForeground(digitColor);
 		text.setHorizontalAlignment(SwingConstants.RIGHT);
 		text.setEditable(false);
 		textScrollBar = new JScrollBar(JScrollBar.HORIZONTAL);
-		//text.setOpaque(true);
-		//text.setBackground(Color.WHITE);
+		textScrollBar.setBackground(background);
 		BoundedRangeModel brm = text.getHorizontalVisibility();
 		textScrollBar.setModel(brm);
-		textScrollBar.setVisible(false);
-		field.add(text);
-		field.add(textScrollBar);
+		textScrollBar.setEnabled(false);
+		field.add(text, BorderLayout.CENTER);
+		field.add(textScrollBar, BorderLayout.SOUTH);
 		field.setBackground(background);
-		
+		System.out.println("" + textScrollBar.getUI());
+
 		center = new JPanel();
 		center.setLayout(new GridLayout(1, 1, 15, 15));
-		
+
+
 		GridBagLayout gridbag = new GridBagLayout();
 		numbers = new JPanel(gridbag);
 		GridBagConstraints constraint = new GridBagConstraints();
-		//numbers.setLayout(new GridLayout(1,1));
-		numbers.setBackground(background);
-		
 		constraint.fill = GridBagConstraints.HORIZONTAL;
 		constraint.weightx = 1.0;
 		constraint.weighty = 1.0;
@@ -67,20 +66,23 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		constraint.ipady = 50;
 		for(int i = 0; i < 20; i++) {
 			num[i] = new JButton();
-			num[i].setFont(new Font("Courier New", Font.BOLD, 18));
+			num[i].setFont(new Font("Helvetica", Font.PLAIN, 18));
 			constraint.gridx = i%5;
 			constraint.gridy = (int)((float)i/5.00);
 			if(i == 15){
+				num[i].setEnabled(false);
 				num[++i] = new JButton();
-				num[i].setFont(new Font("Courier New", Font.BOLD, 18));
+				num[i].setFont(new Font("Helvetica", Font.PLAIN, 18));
 				constraint.gridwidth = 2;
 				numbers.add(num[i], constraint);
 				constraint.gridwidth = 1;
 			}else{
 				numbers.add(num[i], constraint);
 			}
-		}
+			num[i].setBorder(javax.swing.BorderFactory.createLineBorder(Color.WHITE));
+		} 
 		
+		num[18].setFont(new Font("Helvetica", Font.PLAIN, 14));
 		num[0].setText("7");
 		num[1].setText("8");
 		num[2].setText("9");
@@ -98,56 +100,68 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		num[14].setText("+");
 		num[15].setEnabled(false);
 		num[16].setText("0");
-		num[17].setText("<=");
-		num[18].setText("C");
+		num[17].setText("C");
+		num[18].setText("DEL");
 		num[19].setText("=");
 		
 		for(int i = 0; i < 20; i++){
 			try{
+				num[i].setBackground(operatorColor);
+				num[i].setForeground(Color.WHITE);
+			}catch(NumberFormatException e){
+				num[i].setBackground(digitColor);
+				num[i].setForeground(Color.WHITE);
+			}
+		}
+		
+		for(int i = 0; i < 20; i++){
+			try{
 				int number = Integer.parseInt(num[i].getText());
-				num[i].setBackground(digitButtons);
+				num[i].setBackground(digitColor);
+				num[i].setForeground(Color.WHITE);
 			}catch(NumberFormatException e){
 				num[i].setBackground(operatorColor);
+				num[i].setForeground(Color.WHITE);
 			}
 		}
 		center.add(numbers);
-		
+
 		whole.add(field, BorderLayout.NORTH);
 		whole.add(center, BorderLayout.CENTER);
-		
+
 		north = new JPanel();
 		south = new JPanel();
 		east = new JPanel();
 		west = new JPanel();
-		
+
 		area = new JTextArea(7, 20);
 		area.setFont(new Font("Courier New", Font.BOLD, 12));
 		area.setBackground(background);
-		area.setForeground(Color.WHITE);
+		area.setForeground(digitColor);
 		area.setEditable(false);
 		area2 = new JTextArea(7, 20);
 		area2.setFont(new Font("Courier New", Font.BOLD, 12));
 		area2.setBackground(background);
-		area2.setForeground(Color.WHITE);
+		area2.setForeground(digitColor);
 		area2.setEditable(false);
 		statusButton[0][0] = new JButton("<");
 		statusButton[0][1] = new JButton(">");
 		statusButton[1][0] = new JButton("<");
 		statusButton[1][1] = new JButton(">");
-		statusButton[0][0].setBackground(digitButtons);
-		statusButton[0][1].setBackground(digitButtons);
-		statusButton[1][0].setBackground(digitButtons);
-		statusButton[1][1].setBackground(digitButtons);
-		statusButton[0][0].addActionListener(this);
-		statusButton[0][1].addActionListener(this);
-		statusButton[1][0].addActionListener(this);
-		statusButton[1][1].addActionListener(this);
+		for(int i = 0; i < 2; i++){
+			for(int j = 0; j < 2; j++){
+				statusButton[i][j].setBackground(digitColor);
+				statusButton[i][j].setForeground(background);
+				statusButton[i][j].addActionListener(this);
+				statusButton[i][j].setOpaque(true);
+			}
+		}
 		translateStatusPanel = new JPanel();
 		translateStatusPanel.setBackground(background);
 		translateStatusPanel.setLayout(new BorderLayout());
 		JLabel label1 = new JLabel("Infix to Postfix", SwingConstants.CENTER);
 		label1.setFont(new Font("Courier New", Font.BOLD, 12));
-		label1.setForeground(Color.WHITE);
+		label1.setForeground(digitColor);
 		translateStatusPanel.add(label1, BorderLayout.NORTH);
 		translateStatusPanel.add(statusButton[0][0], BorderLayout.WEST);
 		translateStatusPanel.add(new JScrollPane(area, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
@@ -158,7 +172,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		evaluationStatusPanel.setLayout(new BorderLayout());
 		JLabel label = new JLabel("Postfix Evaluation", SwingConstants.CENTER);
 		label.setFont(new Font("Courier New", Font.BOLD, 12));
-		label.setForeground(Color.WHITE);
+		label.setForeground(digitColor);
 		evaluationStatusPanel.add(label, BorderLayout.NORTH);
 		evaluationStatusPanel.add(statusButton[1][0], BorderLayout.WEST);
 		evaluationStatusPanel.add(new JScrollPane(area2, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
@@ -166,25 +180,25 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		south.setLayout(new GridLayout(1,2));
 		south.add(translateStatusPanel);
 		south.add(evaluationStatusPanel);
-		
+
 		add(north, BorderLayout.NORTH);
 		add(south, BorderLayout.SOUTH);
 		add(east, BorderLayout.EAST);
 		add(west, BorderLayout.WEST);
 		add(whole, BorderLayout.CENTER);
-		
+
 		north.setBackground(background);
 		south.setBackground(background);
 		east.setBackground(background);
 		west.setBackground(background);
 		whole.setBackground(background);
-		
+
 		setVisible(true);
 		activeWindow = true;
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		setSize(500, 520);
+		setSize(500,500);
 		setResizable(false);
-		
+
 		for(int j = 0; j < 20; j++) {
 			num[j].addActionListener(this);
 		}
@@ -198,8 +212,10 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 				activeWindow = false;
 			}
 		});
+		repaint();
+		revalidate();
 	}
-	
+
 	public void actionPerformed(ActionEvent event) {
 		if(event.getSource() == timer && activeWindow){
 			whole.requestFocus();
@@ -219,14 +235,12 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 					text.setText(op);
 					op = "";
 					break;
-				} else if(num[i].getText() == "<=") {
+				} else if(num[i].getText() == "DEL") {
 					String screenText = text.getText();
-					screenText = op;
-					System.out.println("|" + screenText + "|");
 					if(screenText.trim().equals("Error!")){
 						screenText = "";
 					}else if(screenText.length() == 0){
-						
+
 					}else{
 						for(int j = 0; j < screenText.length(); j++){
 							if(screenText.charAt(j) == '\n'){
@@ -253,22 +267,26 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 							translateCurr = (j==0?translateCurr-1:translateCurr+1);
 							translateCurr = (translateCurr<0?translateCtr+translateCurr:(translateCurr>=translateCtr?translateCurr-translateCtr:translateCurr));
 							area.setText(listTranslation[translateCurr]);
+							statusButton[0][0].setEnabled(translateCurr==0?false:true);
+							statusButton[0][1].setEnabled(translateCurr+1==translateCtr?false:true);
 						}else{
 							evaluateCurr = (j==0?evaluateCurr-1:evaluateCurr+1);
 							evaluateCurr = (evaluateCurr<0?evaluateCtr+evaluateCurr:(evaluateCurr>=evaluateCtr?evaluateCurr-evaluateCtr:evaluateCurr));
 							area2.setText(listEvaluation[evaluateCurr]);
+							statusButton[1][0].setEnabled(evaluateCurr==0?false:true);
+							statusButton[1][1].setEnabled(evaluateCurr+1==evaluateCtr?false:true);
 						}
 					}catch(NullPointerException exc){}
 				}
 			}
 		}
-		if(text.getText().trim().length()>67){
-			textScrollBar.setVisible(true);
+		if(text.getText().trim().length()>42){
+			textScrollBar.setEnabled(true);
 		}else{
-			textScrollBar.setVisible(false);
+			textScrollBar.setEnabled(false);
 		}
 	}
-	
+
 	private class KeyReader extends KeyAdapter{
 		public void keyPressed(KeyEvent e){
 			String pressed = String.valueOf(e.getKeyChar());
@@ -280,11 +298,10 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 				op = "";
 			} else if(e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
 				String screenText = text.getText();
-				screenText = op;
 				if(screenText.trim().equals("Error!")){
 					screenText = "";
 				}else if(screenText.length() == 0){
-					
+
 				}else{
 					for(int j = 0; j < screenText.length(); j++){
 						if(screenText.charAt(j) == '\n'){
@@ -306,10 +323,10 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 					text.setText(op);
 				}
 			}
-			if(text.getText().trim().length()>67){
-				textScrollBar.setVisible(true);
+			if(text.getText().trim().length()> 42){
+				textScrollBar.setEnabled(true);
 			}else{
-				textScrollBar.setVisible(false);
+				textScrollBar.setEnabled(false);
 			}
 		}
 	}
@@ -323,7 +340,8 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		PseudoQueue<String> statusList = new PseudoQueue<>();
 		translateCtr = 0;
 		translateCurr = 0;
-		int width = infix.length();
+		statusButton[0][0].setEnabled(true);
+		statusButton[0][1].setEnabled(true);
 		infix = infix.trim();
 		PseudoStack<Character> operations = new PseudoStack<>();
 		PseudoArray<String> postfix = new PseudoArray<>(infix.length());
@@ -353,7 +371,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 						poppedOperation = String.valueOf(operations.pop());
 						postfix.add(poppedOperation);
 					}catch(EmptyStackException e){}
-					str += "Pop |" + poppedOperation + "| and Push |" + String.valueOf(infix.charAt(i)) + "|";
+					str += "Pop |" + poppedOperation + "|";
 					operations.push(infix.charAt(i));
 					top = operations.pop();
 					char top2 = 0;
@@ -379,7 +397,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 							operations.push(top);
 						}
 					}
-					str+="\n";
+					str+= ", Commit and Push |" + String.valueOf(infix.charAt(i)) + "|\n";
 				}else if(top == 0){
 					operations.push(infix.charAt(i));
 					str += "Push |" + String.valueOf(infix.charAt(i)) + "|\n";
@@ -395,7 +413,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 						}catch(EmptyStackException e){System.out.println("here1");return null;}
 						str += "|" + String.valueOf(top) + "|";
 					}
-					str += "\n";
+					str += " and Commit\n";
 					if( i+1< infix.length() && (infix.charAt(i+1) == '(' || (infix.charAt(i+1) > 47 && infix.charAt(i+1) < 58) )){
 						infix = infix.substring(0,i+1) + "*" + infix.substring(i+1, infix.length());
 					}
@@ -455,6 +473,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 			listTranslation[i] = statusList.dequeue();
 		}
 		area.setText(listTranslation[translateCurr]);
+		statusButton[0][0].setEnabled(false);
 		return postfix;
 	}
 	
@@ -463,10 +482,18 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		PseudoQueue<String> statusList = new PseudoQueue<>();
 		evaluateCtr = 0;
 		evaluateCurr = 0;
+		statusButton[1][0].setEnabled(true);
+		statusButton[1][1].setEnabled(true);
 		if(postfix == null){
-			str = "Error Occurred!";
+			str = "Error Occured!";
 			statusList.enqueue(str);
 			evaluateCtr++;
+			listEvaluation = new String[evaluateCtr];
+			for(int j = 0; j < evaluateCtr; j++){
+				listEvaluation[j] = statusList.dequeue();
+			}
+			area2.setText(listEvaluation[evaluateCurr]);
+			statusButton[1][0].setEnabled(false);
 			return "Error!";
 		}
 		PseudoStack<Double> numbers = new PseudoStack<>();
@@ -495,38 +522,54 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 					if(postfix.get(i).equals("+")){
 						double num1 = numbers.pop(), num2 = numbers.pop();
 						number = num1+num2;
-						//str = num1 + " + " + num2 + " = " + number + "\n";
 						str += "Popped " + num1 + " and " + num2 + " then add. Result: " + number + "\n";
 					}else if(postfix.get(i).equals("-")){
 						double num1 = numbers.pop(), num2 = numbers.pop();
 						number = num2-num1;
-						//str = num2 + " - " + num1 + " = " + number + "\n";
 						str += "Popped " + num1 + " and " + num2 + " then subtract. Result: " + number + "\n";
 					}else if(postfix.get(i).equals("*")){
 						double num1 = numbers.pop(), num2 = numbers.pop();
 						number = num1*num2;
-						//str = num1 + " * " + num2 + " = " + number + "\n";
 						str += "Popped " + num1 + " and " + num2 + " then multiply. Result: " + number + "\n";
 					}else if(postfix.get(i).equals("/")){
 						double divisor = numbers.pop(), dividend = numbers.pop();
-						if(divisor == 0.0){
-							return "Error!";
-						}
 						number = dividend/divisor;
-						//str = dividend + " / " + divisor + " = " + number + "\n";
+						if(divisor == 0.0){
+							throw new NullPointerException();
+						}
 						str += "Popped " + divisor + " and " + dividend + " then divide. Result: " + number + "\n";
 					}else{
 						str += "Error!";
 						statusList.enqueue(str);
 						evaluateCtr++;
+						for(int j = 0; j < evaluateCtr; j++){
+							listEvaluation[j] = statusList.dequeue();
+						}
+						area2.setText(listEvaluation[evaluateCurr]);
+						statusButton[1][0].setEnabled(false);
 						return "Error!";
 					}
 				}catch(NullPointerException ex){
-					break;
-				}catch(EmptyStackException exc){
-					str = "Error Occurred!";
+					str += "Error! Stop Evaluation!";
 					statusList.enqueue(str);
 					evaluateCtr++;
+					listEvaluation = new String[evaluateCtr];
+					for(int j = 0; j < evaluateCtr; j++){
+						listEvaluation[j] = statusList.dequeue();
+					}
+					area2.setText(listEvaluation[evaluateCurr]);
+					statusButton[1][0].setEnabled(false);
+					return "Error!";
+				}catch(EmptyStackException exc){
+					str += "Error! Stop Evaluation!";
+					statusList.enqueue(str);
+					evaluateCtr++;
+					listEvaluation = new String[evaluateCtr];
+					for(int j = 0; j < evaluateCtr; j++){
+						listEvaluation[j] = statusList.dequeue();
+					}
+					area2.setText(listEvaluation[evaluateCurr]);
+					statusButton[1][0].setEnabled(false);
 					return "Error!";
 				}
 				numbers.push(number);
@@ -567,6 +610,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 			listEvaluation[i] = statusList.dequeue();
 		}
 		area2.setText(listEvaluation[evaluateCurr]);
+		statusButton[1][0].setEnabled(false);
 		return ret;
 	}
 }
