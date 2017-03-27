@@ -44,11 +44,9 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		field.add(text);
 		field.add(textScrollBar);
 		field.setBackground(background);
-		System.out.println("" + textScrollBar.getUI());
 
 		center = new JPanel();
 		center.setLayout(new GridLayout(1, 1, 15, 15));
-
 
 		GridBagLayout gridbag = new GridBagLayout();
 		numbers = new JPanel(gridbag);
@@ -79,8 +77,6 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		{
 			num[i].setBorder(javax.swing.BorderFactory.createLineBorder(Color.WHITE));
 		}
-		
-		
 		
 		num[18].setFont(new Font("Helvetica", Font.PLAIN, 14));
 		num[0].setText("7");
@@ -196,7 +192,6 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 					break;
 				} else if(num[i].getText() == "DEL") {
 					String screenText = text.getText();
-					System.out.println("|" + screenText + "|");
 					if(screenText.trim().equals("Error!")){
 						screenText = "";
 					}else if(screenText.length() == 0){
