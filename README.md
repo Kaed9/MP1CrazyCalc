@@ -1,3 +1,8 @@
-# Machine Problem 1 Crazy Calculator
+# CMSC 123 Machine Problem 1 Crazy Calculator
 
-A calculator where the operations uses stacks that are implemented using queues that are implemented using arrays that are implemented using linked lists.
+A simple calculator whose operation uses Stacks that are implemented using Queues that are implemented using Arrays that are implemented using Linked Lists
+
+Authors:
+Jeff Khirvy Kyell Sarmen
+Kenneth Matthew Lanante
+John Ivan Puayap
