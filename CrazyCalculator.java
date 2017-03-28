@@ -1,6 +1,7 @@
 import javax.swing.*;
 import javax.swing.plaf.*;
 import java.awt.*;
+import java.awt.font.*;
 import java.awt.event.*;
 import java.util.EmptyStackException;
 
@@ -9,7 +10,6 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 	private JPanel field, center, numbers;
 	private JButton[] num = new JButton[20];
 	private JTextField text;
-	private JScrollBar textScrollBar;
 	private JTextArea area, area2;
 	private JButton[][] statusButton = new JButton[2][2];
 	private JPanel translateStatusPanel, evaluationStatusPanel;
@@ -19,6 +19,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 	private Timer timer = new Timer(1, this);
 	private boolean activeWindow;
 	private Color background = new Color(220,220,220), digitColor= new Color(140, 110, 100), operatorColor = new Color(82, 182, 172);
+	private int fontSize = 30;
 
 	public CrazyCalculator(){
 		super("Crazy Calculator");
@@ -34,23 +35,14 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		field.setLayout(new BorderLayout());
 
 		text = new JTextField(77);
-		text.setFont(new Font("Helvetica", Font.BOLD, 20));
+		text.setFont(new Font("Helvetica", Font.BOLD, fontSize));
 		text.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-	    
-		
 		text.setBackground(new Color(245,245,245));
 		text.setForeground(digitColor);
 		text.setHorizontalAlignment(SwingConstants.RIGHT);
 		text.setEditable(false);
-		textScrollBar = new JScrollBar(JScrollBar.HORIZONTAL);
-		textScrollBar.setBackground(background);
-		BoundedRangeModel brm = text.getHorizontalVisibility();
-		textScrollBar.setModel(brm);
-		textScrollBar.setEnabled(false);
 		field.add(text, BorderLayout.CENTER);
-		field.add(textScrollBar, BorderLayout.SOUTH);
 		field.setBackground(background);
-		System.out.println("" + textScrollBar.getUI());
 
 		center = new JPanel();
 		center.setLayout(new GridLayout(1, 1, 15, 15));
@@ -164,7 +156,16 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		label1.setForeground(digitColor);
 		translateStatusPanel.add(label1, BorderLayout.NORTH);
 		translateStatusPanel.add(statusButton[0][0], BorderLayout.WEST);
-		translateStatusPanel.add(new JScrollPane(area, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
+		JPanel areaPanel = new JPanel();
+		areaPanel.setLayout(new BorderLayout());
+		JTextArea transLabel = new JTextArea(7,8);
+		transLabel.setBackground(background);
+		transLabel.setText("Parsed:\nRead:\nAction:\nCommited:\nStack:");
+		transLabel.setForeground(digitColor);
+		transLabel.setFont(new Font("Courier New", Font.BOLD, 12));
+		areaPanel.add(transLabel, BorderLayout.WEST);
+		areaPanel.add(new JScrollPane(area, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
+		translateStatusPanel.add(areaPanel, BorderLayout.CENTER);
 		translateStatusPanel.add(statusButton[0][1], BorderLayout.EAST);
 		
 		evaluationStatusPanel = new JPanel();
@@ -175,7 +176,16 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		label.setForeground(digitColor);
 		evaluationStatusPanel.add(label, BorderLayout.NORTH);
 		evaluationStatusPanel.add(statusButton[1][0], BorderLayout.WEST);
-		evaluationStatusPanel.add(new JScrollPane(area2, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
+		JPanel area2Panel = new JPanel();
+		area2Panel.setLayout(new BorderLayout());
+		JTextArea evalLabel = new JTextArea(7,8);
+		evalLabel.setBackground(background);
+		evalLabel.setText("Parsed:\nRead:\nAction:\nStack:");
+		evalLabel.setForeground(digitColor);
+		evalLabel.setFont(new Font("Courier New", Font.BOLD, 12));
+		area2Panel.add(evalLabel, BorderLayout.WEST);
+		area2Panel.add(new JScrollPane(area2, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
+		evaluationStatusPanel.add(area2Panel, BorderLayout.CENTER);
 		evaluationStatusPanel.add(statusButton[1][1], BorderLayout.EAST);
 		south.setLayout(new GridLayout(1,2));
 		south.add(translateStatusPanel);
@@ -196,7 +206,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		setVisible(true);
 		activeWindow = true;
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		setSize(500,500);
+		setSize(550,500);
 		setResizable(false);
 
 		for(int j = 0; j < 20; j++) {
@@ -252,6 +262,10 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 					}
 					text.setText(" " + screenText.trim());
 					op = screenText;
+					if(text.getText().length()*(fontSize+1) < 910 && fontSize < 30){
+						fontSize+=1;
+						text.setFont(new Font("Helvetica", Font.BOLD, fontSize));
+					}
 				} else {
 					op += num[i].getText();
 					text.setText(op);
@@ -280,10 +294,9 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 				}
 			}
 		}
-		if(text.getText().trim().length()>42){
-			textScrollBar.setEnabled(true);
-		}else{
-			textScrollBar.setEnabled(false);
+		if(text.getText().length()*fontSize >= 910 && fontSize > 12){
+			fontSize--;
+			text.setFont(new Font("Helvetica", Font.BOLD, fontSize));
 		}
 	}
 
@@ -313,6 +326,12 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 				}
 				text.setText(" " + screenText.trim());
 				op = screenText;
+				
+				if(text.getText().length()*(fontSize+1) < 910&& fontSize < 30){
+					fontSize+=1;
+					text.setFont(new Font("Helvetica", Font.BOLD, fontSize));
+				}
+				
 			} else if((pressed.equals("+")) || (pressed.equals("-")) || (pressed.equals("*")) || (pressed.equals("/")) || (pressed.equals("(")) || (pressed.equals(")"))) {
 				op += pressed;
 				text.setText(op);
@@ -323,10 +342,9 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 					text.setText(op);
 				}
 			}
-			if(text.getText().trim().length()> 42){
-				textScrollBar.setEnabled(true);
-			}else{
-				textScrollBar.setEnabled(false);
+			if(text.getText().length()*fontSize >= 910 && fontSize > 12){
+				fontSize--;
+				text.setFont(new Font("Helvetica", Font.BOLD, fontSize));
 			}
 		}
 	}
@@ -355,13 +373,13 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 					j++;
 				}
 				postfix.add(infix.substring(i,i+j));
-				str = "Read: " + infix.substring(i, i+j) + "\nAction: Commit\n";
+				str = infix.substring(i, i+j) + "\nCommit\n";
 				i += j-1;
 				if(i+1 < infix.length() && infix.charAt(i+1) == '('){
 					infix = infix.substring(0,i+1) + "*" + infix.substring(i+1, infix.length());
 				}
 			}else{ // reads a non digit character in String infix
-				str = "Read: " + String.valueOf(infix.charAt(i) + "\nAction: ");
+				str = String.valueOf(infix.charAt(i) + "\n");
 				try{
 					top = operations.peek();
 				}catch(EmptyStackException e){top = 0;}
@@ -404,13 +422,13 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 				}else if( infix.charAt(i) == ')' ){
 					try{
 						top = operations.pop();
-					}catch(EmptyStackException e){System.out.println("here");return null;}
+					}catch(EmptyStackException e){return null;}
 					str = "Pop";
 					while( top != '(' ){
 						postfix.add(String.valueOf(top));
 						try{
 							top = operations.pop();
-						}catch(EmptyStackException e){System.out.println("here1");return null;}
+						}catch(EmptyStackException e){return null;}
 						str += "|" + String.valueOf(top) + "|";
 					}
 					str += " and Commit\n";
@@ -426,7 +444,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 			for(int j = 0; j < postfix.size(); j++){
 				commited += postfix.get(j)==null?"":postfix.get(j);
 			}
-			str = "Parsed: " + infix.substring(0,i+1) + "\n" + str + "Commited: " + commited + "\nStack: " + operations.toString() + "\n";
+			str = infix.substring(0,i+1) + "\n" + str + commited + "\n" + operations.toString() + "\n";
 			statusList.enqueue(str);
 			translateCtr++;
 		}
@@ -434,7 +452,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		//After checking the end of infix string, all operations in the stack is popped
 		try{
 			top = operations.pop();
-			str = "Parsed: " + infix + "\nRead: END\nAction: Pop |" + String.valueOf(top) + "|";
+			str = infix + "\nEND\nPop |" + String.valueOf(top) + "|";
 		}catch(EmptyStackException e){
 			stackEmpty = true;
 		}
@@ -459,13 +477,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		for(int j = 0; j < postfix.size(); j++){
 			commited += postfix.get(j)==null?"":postfix.get(j);
 		}
-		str += "Commited: " + commited + "\n";
-		statusList.enqueue(str);
-		translateCtr++;
-		str = "\nInfix expression:\n" + infix + "\nPostfix expression:\n";
-		for(int i = 0; i < postfix.ctr(); i++){
-			str += "" + postfix.get(i);
-		}
+		str += commited + "\n";
 		statusList.enqueue(str);
 		translateCtr++;
 		listTranslation = new String[translateCtr];
@@ -498,7 +510,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		}
 		PseudoStack<Double> numbers = new PseudoStack<>();
 		for(int i = 0; i < postfix.size(); i++){
-			str = "Parsed: ";
+			str = "";
 			for(int j = 0; j <= i; j++){
 				if(!(postfix.get(j)==null)){
 					str += postfix.get(j);
@@ -511,33 +523,33 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 				if(!(postfix.get(i)==null)){
 					double num = Double.parseDouble(postfix.get(i));
 					numbers.push(num);
-					str += "Read: " + num + "\nAction: Push " + num + "\n";
+					str += num + "\nPush " + num + "\n";
 				}else{
 					continue;
 				}
 			}catch(NumberFormatException e){
-				str += "Read: " + postfix.get(i) + "\nAction: ";
+				str += postfix.get(i) + "\n";
 				double number = 0;
 				try{
 					if(postfix.get(i).equals("+")){
 						double num1 = numbers.pop(), num2 = numbers.pop();
 						number = num1+num2;
-						str += "Popped " + num1 + " and " + num2 + " then add. Result: " + number + "\n";
+						str += "Popped " + num1 + " and " + num2 + " then add. Result: " + number + ". ";
 					}else if(postfix.get(i).equals("-")){
 						double num1 = numbers.pop(), num2 = numbers.pop();
 						number = num2-num1;
-						str += "Popped " + num1 + " and " + num2 + " then subtract. Result: " + number + "\n";
+						str += "Popped " + num1 + " and " + num2 + " then subtract. Result: " + number + ". ";
 					}else if(postfix.get(i).equals("*")){
 						double num1 = numbers.pop(), num2 = numbers.pop();
 						number = num1*num2;
-						str += "Popped " + num1 + " and " + num2 + " then multiply. Result: " + number + "\n";
+						str += "Popped " + num1 + " and " + num2 + " then multiply. Result: " + number + ". ";
 					}else if(postfix.get(i).equals("/")){
 						double divisor = numbers.pop(), dividend = numbers.pop();
 						number = dividend/divisor;
 						if(divisor == 0.0){
 							throw new NullPointerException();
 						}
-						str += "Popped " + divisor + " and " + dividend + " then divide. Result: " + number + "\n";
+						str += "Popped " + divisor + " and " + dividend + " then divide. Result: " + number + ". ";
 					}else{
 						str += "Error!";
 						statusList.enqueue(str);
@@ -575,7 +587,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 				numbers.push(number);
 				str += "Push result: "+ number + "\n";
 			}
-			str += "Stack: " + numbers.toString() + "\n";
+			str += numbers.toString() + "\n";
 			statusList.enqueue(str);
 			evaluateCtr++;
 		}
@@ -588,17 +600,6 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 			long toInteger = (long)result;
 			ret = String.valueOf(toInteger);
 		}
-		str = "Postfix Expression:\n";
-		for(int i = 0; i < postfix.size(); i++){
-			if(!(postfix.get(i)==null)){
-				str += postfix.get(i);
-			}else{
-				continue;
-			}
-		}
-		str += "\nResult: " + ret + "\n";
-		statusList.enqueue(str);
-		evaluateCtr++;
 		for(int i = 0; i < ret.length(); i++){
 			if(ret.charAt(i) == 'E'){
 				ret = "(" + ret.substring(0, i) + ")*10^(" + ret.substring(i+1, ret.length()) + ")";
@@ -611,6 +612,55 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		}
 		area2.setText(listEvaluation[evaluateCurr]);
 		statusButton[1][0].setEnabled(false);
+		printToCmd();
 		return ret;
+	}
+	
+	public void printToCmd(){
+		String[][] translateTable = new String[translateCtr][5];
+		String[][] evaluateTable = new String[evaluateCtr][4];
+		int[] translateTableWidth = {6,4,6,8,5};
+		int[] evaluateTableWidth = {6,4,6,5};
+		
+		for(int i = 0; i < translateCtr; i++){
+			for(int j = 0, start = 0, end = 0; j < 5; j++){
+				while(end < listTranslation[i].length() && listTranslation[i].charAt(end) != '\n'){end++;}
+				translateTable[i][j] = listTranslation[i].substring(start, end);
+				//System.out.println("|" + translateTable[i][j] + "|" + i + ", " + j);
+				if(translateTable[i][j].length() > translateTableWidth[j]){
+					translateTableWidth[j] = translateTable[i][j].length();
+				}
+				start = ++end;
+			}
+		}
+		
+		for(int i = 0; i < evaluateCtr; i++){
+			for(int j = 0, start = 0, end = 0; j < 4; j++){
+				while(listEvaluation[i].length() > end && listEvaluation[i].charAt(end) != '\n'){end++;}
+				evaluateTable[i][j] = listEvaluation[i].substring(start, end);
+				if(evaluateTable[i][j].length() > evaluateTableWidth[j]){
+					evaluateTableWidth[j] = evaluateTable[i][j].length();
+				}
+				start = ++end;
+			}
+		}
+		String spaces = "                                                                                      ";
+		System.out.println("\nInfix To Postfix:");
+		System.out.println("Parsed" + spaces.substring(0, translateTableWidth[0]-6) + "|Read" + spaces.substring(0, translateTableWidth[1]-4) + "|Action" + spaces.substring(0, translateTableWidth[2]-6) + "|Commited" + spaces.substring(0, translateTableWidth[3]-8) + "|Stack" + spaces.substring(0, translateTableWidth[4]-5) + "|");
+		for(int i = 0; i < translateCtr; i++){
+			for(int j = 0; j < 5; j++){
+				System.out.print(translateTable[i][j] + spaces.substring(0,translateTableWidth[j]-translateTable[i][j].length()) + "|");
+			}
+			System.out.println();
+		}
+		
+		System.out.println("\nPostfix Evaluation:");
+		System.out.println("Parsed" + spaces.substring(0, evaluateTableWidth[0]-6) + "|Read" + spaces.substring(0, evaluateTableWidth[1]-4) + "|Action" + spaces.substring(0, evaluateTableWidth[2]-6) + "|Stack" + spaces.substring(0, evaluateTableWidth[3]-4));
+		for(int i = 0; i < evaluateCtr; i++){
+			for(int j = 0; j < 4; j++){
+				System.out.print(evaluateTable[i][j] + spaces.substring(0,evaluateTableWidth[j]-evaluateTable[i][j].length()) + "|");
+			}
+			System.out.println();
+		}
 	}
 }
