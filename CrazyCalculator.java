@@ -196,9 +196,8 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 						fontSize+=1;
 						text.setFont(new Font("Monospace", Font.BOLD, fontSize));
 					}
-					}else if(screenText.length() == 0){
-
-					}else{
+					}
+					else{
 						for(int j = 0; j < screenText.length(); j++){
 							if(screenText.charAt(j) == '\n'){
 								screenText = screenText.substring(0, j);
