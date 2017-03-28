@@ -423,7 +423,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 					try{
 						top = operations.pop();
 					}catch(EmptyStackException e){return null;}
-					str = "Pop";
+					str += "Pop";
 					while( top != '(' ){
 						postfix.add(String.valueOf(top));
 						try{
