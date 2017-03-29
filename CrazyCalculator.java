@@ -19,11 +19,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 	{
 		super("Crazy Calculator");
 		
-<<<<<<< HEAD
 		Image image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("CalcIcon.jpg"));
-=======
-		Image image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("CalcIcon.jpeg"));
->>>>>>> 486b2397ec5258b4264d855c7fefe99b225409f6
 		ImageIcon icon = new ImageIcon(image);
 		
 		setIconImage(icon.getImage());
@@ -38,11 +34,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		text.setForeground(digitColor);
 		text.setBackground(new Color(245, 245, 245));
 		text.setHorizontalAlignment(SwingConstants.RIGHT);
-<<<<<<< HEAD
 		text.setFont(new Font("Helvetica", Font.BOLD, fontSize));
-=======
-		text.setFont(new Font("Monospace", Font.BOLD, fontSize));
->>>>>>> 486b2397ec5258b4264d855c7fefe99b225409f6
 		text.setEditable(false);
 		text.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		text.setText("0");
@@ -66,13 +58,13 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		
 		for(int i = 0; i < 20; i++) {
 			num[i] = new JButton();
-			num[i].setFont(new Font("Monospace", Font.PLAIN, 18));
+			num[i].setFont(new Font("Helvetica", Font.PLAIN, 18));
 			constraint.gridx = i%5;
 			constraint.gridy = (int)((float)i/5.00);
 			if(i == 15)
 			{
 				num[++i] = new JButton();
-				num[i].setFont(new Font("Monospace", Font.PLAIN, 18));
+				num[i].setFont(new Font("Helvetica", Font.PLAIN, 18));
 				
 				constraint.gridwidth = 2;
 				numbers.add(num[i], constraint);
@@ -107,11 +99,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		num[16].setText("0");
 		num[17].setText("C");
 		num[18].setText("DEL");
-<<<<<<< HEAD
 		num[18].setFont(new Font("Helvetica", Font.BOLD, 14));
-=======
-		num[18].setFont(new Font("Monospace", Font.BOLD, 14));
->>>>>>> 486b2397ec5258b4264d855c7fefe99b225409f6
 		num[19].setText("=");
 		
 		for(int i = 0; i < 20; i++){
@@ -154,10 +142,6 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		whole.setBackground(background);
 		whole.add(field, BorderLayout.NORTH);
 		whole.add(center, BorderLayout.CENTER);
-<<<<<<< HEAD
-=======
-		
->>>>>>> 486b2397ec5258b4264d855c7fefe99b225409f6
 
 		add(north, BorderLayout.NORTH);
 		add(south, BorderLayout.SOUTH);
@@ -165,14 +149,11 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		add(west, BorderLayout.WEST);
 		add(whole, BorderLayout.CENTER);
 
-<<<<<<< HEAD
 		setVisible(true);
 		activeWindow = true;
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setSize(500,500);
 		setResizable(false);
-=======
->>>>>>> 486b2397ec5258b4264d855c7fefe99b225409f6
 		
 		for(int j = 0; j < 20; j++) {
 			num[j].addActionListener(this);
@@ -218,16 +199,9 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 						screenText = "";
 					if(text.getText().length()*(fontSize+1) < 810&& fontSize < 30){
 						fontSize+=1;
-<<<<<<< HEAD
 						text.setFont(new Font("Helvetica", Font.BOLD, fontSize));
 					}
 					}else{
-=======
-						text.setFont(new Font("Monospace", Font.BOLD, fontSize));
-					}
-					}
-					else{
->>>>>>> 486b2397ec5258b4264d855c7fefe99b225409f6
 						for(int j = 0; j < screenText.length(); j++){
 							if(screenText.charAt(j) == '\n'){
 								screenText = screenText.substring(0, j);
@@ -250,15 +224,9 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 			}
 		}
 		
-<<<<<<< HEAD
 		if(text.getText().length()*fontSize >= 810 && fontSize > 12){
 			fontSize--;
 			text.setFont(new Font("Helvetica", Font.BOLD, fontSize));
-=======
-		if(text.getText().length()*fontSize >= 810){
-			fontSize--;
-			text.setFont(new Font("Monospace", Font.BOLD, fontSize));
->>>>>>> 486b2397ec5258b4264d855c7fefe99b225409f6
 		}
 	}
 
@@ -302,11 +270,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 				
 				if(text.getText().length()*(fontSize+1) < 810&& fontSize < 30){
 					fontSize+=1;
-<<<<<<< HEAD
 					text.setFont(new Font("Helvetica", Font.BOLD, fontSize));
-=======
-					text.setFont(new Font("Monospace", Font.BOLD, fontSize));
->>>>>>> 486b2397ec5258b4264d855c7fefe99b225409f6
 				}
 			}
 			else if((pressed.equals("+")) || (pressed.equals("-")) || (pressed.equals("*")) || (pressed.equals("/")) || (pressed.equals("(")) || (pressed.equals(")"))){
@@ -323,15 +287,9 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 				}
 			}
 			
-<<<<<<< HEAD
 			if(text.getText().length()*fontSize >= 810 && fontSize > 12){
 				fontSize--;
 				text.setFont(new Font("Helvetica", Font.BOLD, fontSize));
-=======
-			if(text.getText().length()*fontSize >= 810){
-				fontSize--;
-				text.setFont(new Font("Monospace", Font.BOLD, fontSize));
->>>>>>> 486b2397ec5258b4264d855c7fefe99b225409f6
 			}
 		}
 	}
@@ -461,7 +419,6 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		try{
 			top = operations.pop();
 			str = "Read: END\nPop |" + String.valueOf(top) + "|";
-<<<<<<< HEAD
 			System.out.print("       END		Pop " + String.valueOf(top) + "		");
 			String yoy = operations.toString();
 			for(int w = 0; w < yoy.length(); w++) {
@@ -473,9 +430,6 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 				committed += postfix.get(j)==null?"":postfix.get(j);
 			}
 			System.out.println("				" + committed + top + "			 " + infix.substring(0, infix.length()));
-=======
-			
->>>>>>> 486b2397ec5258b4264d855c7fefe99b225409f6
 		}catch(EmptyStackException e){
 			stackEmpty = true;
 		}
@@ -540,10 +494,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 				}
 			}catch(NumberFormatException e){
 				str = "\nRead: " + postfix.get(i) + "\n";
-<<<<<<< HEAD
 				System.out.print("        " + postfix.get(i) + "	");
-=======
->>>>>>> 486b2397ec5258b4264d855c7fefe99b225409f6
 				area.append(str);
 				double number = 0;
 				try{
@@ -552,40 +503,30 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 						number = num1+num2;
 						
 						str = "Popped " + num1 + " and " + num2 + " then add. Result: " + number + "\n";
-<<<<<<< HEAD
 						System.out.print("    " + num1 + " & " + num2 + "		       Add" + "			 " + number + "			" + number);
-=======
->>>>>>> 486b2397ec5258b4264d855c7fefe99b225409f6
 						area.append(str);
 					}else if(postfix.get(i).equals("-")){
 						double num1 = numbers.pop(), num2 = numbers.pop();
 						number = num2-num1;
 						
 						str = "Popped " + num1 + " and " + num2 + " then subtract. Result: " + number + "\n";
-<<<<<<< HEAD
 						System.out.print("    " + num1 + " & " + num2 + "		       Subtract" + "			 " + number + "			" + number);
-=======
->>>>>>> 486b2397ec5258b4264d855c7fefe99b225409f6
 						area.append(str);
 					}else if(postfix.get(i).equals("*")){
 						double num1 = numbers.pop(), num2 = numbers.pop();
 						number = num1*num2;
 						
 						str = "Popped " + num1 + " and " + num2 + " then multiply. Result: " + number + "\n";
-<<<<<<< HEAD
 						System.out.print("    " + num1 + " & " + num2 + "		       Multiply" + "			 " + number + "			" + number);
-=======
->>>>>>> 486b2397ec5258b4264d855c7fefe99b225409f6
 						area.append(str);
 					}else if(postfix.get(i).equals("/")){
 						double divisor = numbers.pop(), dividend = numbers.pop();
+						if(divisor == 0.0){
+							return "Error!";
+						}
 						number = dividend/divisor;
-						
 						str = "Popped " + divisor + " and " + dividend + " then divide. Result: " + number + "\n";
-<<<<<<< HEAD
 						System.out.print("    " + divisor + " & " + dividend + "		       Divide" + "			 " + number + "			" + number);
-=======
->>>>>>> 486b2397ec5258b4264d855c7fefe99b225409f6
 						area.append(str);
 					}else{
 						return "Error!";
