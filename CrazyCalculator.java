@@ -19,7 +19,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 	{
 		super("Crazy Calculator");
 		
-		Image image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("CalcIcon.jpeg"));
+		Image image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("CalcIcon.jpg"));
 		ImageIcon icon = new ImageIcon(image);
 		
 		setIconImage(icon.getImage());
@@ -142,7 +142,6 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		whole.setBackground(background);
 		whole.add(field, BorderLayout.NORTH);
 		whole.add(center, BorderLayout.CENTER);
-		
 
 		add(north, BorderLayout.NORTH);
 		add(south, BorderLayout.SOUTH);
@@ -150,6 +149,11 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		add(west, BorderLayout.WEST);
 		add(whole, BorderLayout.CENTER);
 
+		setVisible(true);
+		activeWindow = true;
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		setSize(500,500);
+		setResizable(false);
 		
 		for(int j = 0; j < 20; j++) {
 			num[j].addActionListener(this);
@@ -301,6 +305,8 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		char top = 0;
 		boolean stackEmpty = false;
 		str = "Infix to Postfix:\n";
+		System.out.println("\nInfix to Postfix:\n");
+		System.out.println("       READ		ACTION			STACK			COMMITTED			PARSED		");
 		area.append(str);
 		for(int i = 0; i < infix.length(); i++){
 			if(infix.charAt(i) > 47 && infix.charAt(i) < 58){ 
@@ -310,6 +316,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 				}
 				postfix.add(infix.substring(i,i+j));
 				str = "Read: " + infix.substring(i, i+j) + "\nAction: Commit\n";
+				System.out.print("	" + infix.substring(i, i + j) + "		Commit		");
 				area.append(str);
 				i += j-1;
 				if(i+1 < infix.length() && infix.charAt(i+1) == '('){
@@ -317,6 +324,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 				}
 			}else{
 				str = "Read: " + String.valueOf(infix.charAt(i) + "\nAction: ");
+				System.out.print("	" + String.valueOf(infix.charAt(i)) + "	");
 				area.append(str);
 				try{
 					top = operations.peek();
@@ -328,6 +336,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 						postfix.add(poppedOperation);
 					}catch(EmptyStackException e){}
 					str = "Pop |" + poppedOperation + "| and Push |" + String.valueOf(infix.charAt(i)) + "|";
+					System.out.print("     Pop and Push   	");
 					operations.push(infix.charAt(i));
 					top = operations.pop();
 					char top2 = 0;
@@ -358,6 +367,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 				}else if(top == 0){
 					operations.push(infix.charAt(i));
 					str = "Push |" + String.valueOf(infix.charAt(i)) + "|\n";
+					System.out.print("	Push " + String.valueOf(infix.charAt(i)) + "		");
 					area.append(str);
 				}else if( infix.charAt(i) == ')' ){
 					try{
@@ -366,6 +376,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 						return null;
 					}
 					str = "Pop";
+					System.out.print("	Pop ");
 					while( top != '(' ){
 						postfix.add(String.valueOf(top));
 						try{
@@ -374,6 +385,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 							return null;
 						}
 						str += "|" + String.valueOf(top) + "|";
+						System.out.print(String.valueOf(top) + "		");
 					}
 					str += "\n";
 					area.append(str);
@@ -383,6 +395,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 				}else{
 					operations.push(infix.charAt(i));
 					str = "Push |" + String.valueOf(infix.charAt(i)) + "|\n";
+					System.out.print("			");
 					area.append(str);
 				}
 			}
@@ -390,14 +403,33 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 			for(int j = 0; j < postfix.size(); j++){
 				commited += postfix.get(j)==null?"":postfix.get(j);
 			}
-			str = "Parsed: " + infix.substring(0,i+1) + "\nCommited: " + commited + "\nStack: " + operations.toString() + "\n";
+			str = "Parsed: " + infix.substring(0,i+1) + "\nCommitted: " + commited + "\nStack: " + operations.toString() + "\n";
+			try {
+			String yo = operations.toString();
+			for(int w = 0; w < yo.length(); w++) {
+				if(yo.charAt(w) != '|')
+					System.out.print(yo.charAt(w));
+			}
+			System.out.print("				" + commited + "			 " + infix.substring(0, i + 1));
+			} catch(StringIndexOutOfBoundsException stEx) { }
 			area.append(str + "\n");
+			System.out.println();
 		}
 
 		try{
 			top = operations.pop();
 			str = "Read: END\nPop |" + String.valueOf(top) + "|";
-			
+			System.out.print("       END		Pop " + String.valueOf(top) + "		");
+			String yoy = operations.toString();
+			for(int w = 0; w < yoy.length(); w++) {
+				if(yoy.charAt(w) != '|')
+					System.out.print(yoy.charAt(w));
+			}
+			String committed = "";
+			for(int j = 0; j < postfix.size(); j++){
+				committed += postfix.get(j)==null?"":postfix.get(j);
+			}
+			System.out.println("				" + committed + top + "			 " + infix.substring(0, infix.length()));
 		}catch(EmptyStackException e){
 			stackEmpty = true;
 		}
@@ -410,6 +442,17 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 			try{
 				top = operations.pop();
 				str += "|" + String.valueOf(top) + "|";
+				System.out.print("       			Pop " + String.valueOf(top) + "		");
+				String yoyo = operations.toString();
+				for(int w = 0; w < yoyo.length(); w++) {
+					if(yoyo.charAt(w) != '|')
+						System.out.print(yoyo.charAt(w));
+				}
+				String committed = "";
+				for(int j = 0; j < postfix.size(); j++){
+					committed += postfix.get(j)==null?"":postfix.get(j);
+				}
+				System.out.println("				" + committed + top + "			 " + infix.substring(0, infix.length()));
 			}catch(EmptyStackException e){
 				stackEmpty = true;
 			}
@@ -431,12 +474,16 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 			return "Error!";
 		}
 		str = "Postfix result: ";
+		System.out.print("\nPostfix Result: ");
 		area.append(str);
 		for(int i = 0; i < postfix.ctr(); i++){
 			str = "" + postfix.get(i);
 			area.append(str);
+			System.out.print(str);
 		}
 		area.append("\n");
+		System.out.println("\n\nPostfix Calculation: \n");
+		System.out.println("       READ		POP			ACTION			RESULT			PUSH		");
 		PseudoStack<Double> numbers = new PseudoStack<>();
 		for(int i = 0; i < postfix.size(); i++){
 			try{
@@ -447,6 +494,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 				}
 			}catch(NumberFormatException e){
 				str = "\nRead: " + postfix.get(i) + "\n";
+				System.out.print("        " + postfix.get(i) + "	");
 				area.append(str);
 				double number = 0;
 				try{
@@ -455,24 +503,30 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 						number = num1+num2;
 						
 						str = "Popped " + num1 + " and " + num2 + " then add. Result: " + number + "\n";
+						System.out.print("    " + num1 + " & " + num2 + "		       Add" + "			 " + number + "			" + number);
 						area.append(str);
 					}else if(postfix.get(i).equals("-")){
 						double num1 = numbers.pop(), num2 = numbers.pop();
 						number = num2-num1;
 						
 						str = "Popped " + num1 + " and " + num2 + " then subtract. Result: " + number + "\n";
+						System.out.print("    " + num1 + " & " + num2 + "		       Subtract" + "			 " + number + "			" + number);
 						area.append(str);
 					}else if(postfix.get(i).equals("*")){
 						double num1 = numbers.pop(), num2 = numbers.pop();
 						number = num1*num2;
 						
 						str = "Popped " + num1 + " and " + num2 + " then multiply. Result: " + number + "\n";
+						System.out.print("    " + num1 + " & " + num2 + "		       Multiply" + "			 " + number + "			" + number);
 						area.append(str);
 					}else if(postfix.get(i).equals("/")){
 						double divisor = numbers.pop(), dividend = numbers.pop();
+						if(divisor == 0.0){
+							return "Error!";
+						}
 						number = dividend/divisor;
-						
 						str = "Popped " + divisor + " and " + dividend + " then divide. Result: " + number + "\n";
+						System.out.print("    " + divisor + " & " + dividend + "		       Divide" + "			 " + number + "			" + number);
 						area.append(str);
 					}else{
 						return "Error!";
@@ -481,12 +535,15 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 					break;
 				}catch(EmptyStackException exc){
 					str = "Error Occurred!";
+					System.out.println("\n\nERROR OCCURED");
 					area.append(str);
+					System.out.println("\n-------------------------------------------------------------------------------------------------------------------------");
 					return "Error!";
 				}
 				numbers.push(number);
 				str = "Pushed: "+ number + "\n";
 				area.append(str);
+				System.out.println();
 			}
 		}
 		double result = 0.0f;
@@ -499,6 +556,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 			ret = String.valueOf(toInteger);
 		}
 		str = "\nResult: " + ret + "\n";
+		System.out.print("\n" + str);
 		area.append(str);
 		for(int i = 0; i < ret.length(); i++){
 			if(ret.charAt(i) == 'E'){
@@ -506,6 +564,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 				break;
 			}
 		}
+		System.out.println("\n-------------------------------------------------------------------------------------------------------------------------");
 		fontSize = 30;
 		return ret;
 	}
