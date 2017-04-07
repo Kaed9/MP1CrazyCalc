@@ -1,13 +1,15 @@
-public class PseudoArray <T>{
+public class PseudoArray <T> {
+	
 	private PseudoLinkedList<T> keys;
 	private final int size;
 	private int ctr;
 	
-	public PseudoArray(int size){
+	public PseudoArray(int size) {
+		
 		keys = new PseudoLinkedList<>();
 		keys.first = new PseudoLink<>(null);
 		PseudoLink<T> link = keys.first;
-		for(int i = 0; i < size-1; i++){
+		for(int i = 0; i < size-1; i++) {
 			link.next = new PseudoLink<>(null);
 			link = link.next;
 		}
@@ -15,12 +17,13 @@ public class PseudoArray <T>{
 		ctr = 0;
 	}
 	
-	public boolean add(T element){
-		if(ctr >= size){
+	public boolean add(T element) {
+		
+		if(ctr >= size) {
 			throw new ArrayIndexOutOfBoundsException();
-		}else{
-			PseudoLink<T>link = keys.first;
-			for(int i = 0; i < ctr; i++){
+		} else {
+			PseudoLink<T> link = keys.first;
+			for(int i = 0; i < ctr; i++) {
 				link = link.next;
 			}
 			link.setKey(element);
@@ -29,12 +32,13 @@ public class PseudoArray <T>{
 		return true;
 	}
 	
-	public boolean add(int index, T element){
-		if(index >= size){
-			throw new ArrayIndexOutOfBoundsException();
-		}else{
-			PseudoLink<T> link = keys.first;
-			for(int i = 0; i < index; i++){
+	public boolean add(int index, T element) {
+		
+		PseudoLink<T> link = keys.first;
+		if(index >= size || index < 0) {
+			throw new ArrayIndexOutOfBoundsException(String.valueOf(index));
+		} else {
+			for(int i = 0; i < index; i++) {
 				link = link.next;
 			}
 			link.setKey(element);
@@ -42,20 +46,26 @@ public class PseudoArray <T>{
 		return true;
 	}
 	
-	public T get(int index){
+	public T get(int index) {
+		
 		PseudoLink<T> link = keys.first;
-		for(int i = 0; i < index; i++){
-			link = link.next;
+		if(index >= size || index < 0) {
+			throw new ArrayIndexOutOfBoundsException(String.valueOf(index));
+		} else {
+			for(int i = 0; i < index; i++) {
+				link = link.next;
+			}
 		}
 		return link.getKey();
 	}
 	
-	
-	public int size(){
+	public int size() {
+		
 		return size;
 	}
 	
-	public int ctr(){
+	public int ctr() {
+		
 		return ctr;
 	}
 }

@@ -1,28 +1,32 @@
 import java.util.EmptyStackException;
 
-public class PseudoStack<T>{
+public class PseudoStack<T> {
+	
 	private PseudoQueue<T> items;
 	private int size = 0;
 	
-	public PseudoStack(){
+	public PseudoStack() {
+		
 		items = new PseudoQueue<>();
 	}
 	
-	public void push(T element){
+	public void push(T element) {
+		
 		PseudoQueue<T> buffer = new PseudoQueue<>();
-		for(int i = 0; i < size; i++){
+		for(int i = 0; i < size; i++) {
 			buffer.enqueue(items.dequeue());
 		}
 		items.enqueue(element);
-		for(int i = 0; i < size; i++){
+		for(int i = 0; i < size; i++) {
 			items.enqueue(buffer.dequeue());
 		}
 		size++;
 		buffer = null;
 	}
 	
-	public T pop() throws EmptyStackException{
-		if(size == 0){
+	public T pop() throws EmptyStackException {
+		
+		if(size == 0) {
 			throw new EmptyStackException(); 
 		}
 		T ret = items.dequeue();
@@ -30,14 +34,16 @@ public class PseudoStack<T>{
 		return ret;
 	}
 	
-	public T peek() throws EmptyStackException{
-		if(size == 0){
+	public T peek() throws EmptyStackException {
+		
+		if(size == 0) {
 			throw new EmptyStackException();
 		}
 		return items.peek();
 	}
 	
 	public String toString() {
+		
 		String ret = "", element = "";
 		PseudoQueue<T> buffer = new PseudoQueue<>();
 		for(int i = 0; i < size; i++) {
@@ -59,6 +65,4 @@ public class PseudoStack<T>{
 		buffer = null;
 		return ret;
 	}
-	
-	
 }
