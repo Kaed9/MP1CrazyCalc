@@ -5,29 +5,35 @@ import java.awt.font.*;
 import java.awt.event.*;
 import java.util.EmptyStackException;
 
-public class CrazyCalculator extends JFrame implements ActionListener{
+public class CrazyCalculator extends JFrame implements ActionListener, Runnable{
 	private JPanel whole, north, south, east, west;
-	private JPanel field, center, numbers;
+	private JPanel field, center, numbers, calculatorPanel;
 	private JButton[] num = new JButton[20];
 	private JTextField text;
-	private JTextArea area, area2;
-	private JButton[][] statusButton = new JButton[2][2];
-	private JPanel translateStatusPanel, evaluationStatusPanel;
 	private String[] listTranslation, listEvaluation;
 	private int translateCurr = 0, evaluateCurr = 0, translateCtr = 0, evaluateCtr = 0;
+	private String[][] translateTable, evaluateTable;
 	private String op = "", str = "";
 	private Timer timer = new Timer(1, this);
-	private boolean activeWindow;
+	private boolean activeWindow, runningAnimation = false;
 	private Color background = new Color(220,220,220), digitColor= new Color(140, 110, 100), operatorColor = new Color(82, 182, 172);
 	private int fontSize = 30;
+	private JPanel translateAnimPanel, evaluateAnimPanel;
+	private TranslateAnimation trans = new TranslateAnimation();
+	private EvaluateAnimation eval = new EvaluateAnimation();
+	private Thread animationThread = null;
+	private JTabbedPane translateTabs = new JTabbedPane(), evaluateTabs = new JTabbedPane();
+	private CalcTable tables = new CalcTable();
+	private JTextField translateResultField, evaluateResultField;
+	private short width = 1282, height = 642;
 
 	public CrazyCalculator(){
 		super("Crazy Calculator");
 		Image image = Toolkit.getDefaultToolkit().getImage(getClass().getResource("CalcIcon.jpg"));
 		ImageIcon icon = new ImageIcon(image);
 		setIconImage(icon.getImage());
-		setLayout(new BorderLayout());
-
+		setLayout(null);
+		
 		whole = new JPanel();
 		whole.setLayout(new BorderLayout(5, 5));
 
@@ -55,26 +61,26 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		constraint.weightx = 1.0;
 		constraint.weighty = 1.0;
 		constraint.ipadx = 100;
-		constraint.ipady = 50;
+		constraint.ipady = 100;
 		for(int i = 0; i < 20; i++) {
 			num[i] = new JButton();
-			num[i].setFont(new Font("Helvetica", Font.PLAIN, 18));
+			num[i].setFont(new Font("Helvetica", Font.PLAIN, 23));
 			constraint.gridx = i%5;
 			constraint.gridy = (int)((float)i/5.00);
 			if(i == 15){
 				num[i].setEnabled(false);
 				num[++i] = new JButton();
-				num[i].setFont(new Font("Helvetica", Font.PLAIN, 18));
+				num[i].setFont(new Font("Helvetica", Font.PLAIN, 23));
 				constraint.gridwidth = 2;
 				numbers.add(num[i], constraint);
 				constraint.gridwidth = 1;
 			}else{
 				numbers.add(num[i], constraint);
 			}
-			num[i].setBorder(javax.swing.BorderFactory.createLineBorder(Color.WHITE));
-		} 
+			num[i].setBorder(javax.swing.BorderFactory.createLineBorder(background));
+		}
 		
-		num[18].setFont(new Font("Helvetica", Font.PLAIN, 14));
+		num[18].setFont(new Font("Helvetica", Font.PLAIN, 18));
 		num[0].setText("7");
 		num[1].setText("8");
 		num[2].setText("9");
@@ -125,77 +131,53 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		south = new JPanel();
 		east = new JPanel();
 		west = new JPanel();
-
-		area = new JTextArea(7, 20);
-		area.setFont(new Font("Courier New", Font.BOLD, 12));
-		area.setBackground(background);
-		area.setForeground(digitColor);
-		area.setEditable(false);
-		area2 = new JTextArea(7, 20);
-		area2.setFont(new Font("Courier New", Font.BOLD, 12));
-		area2.setBackground(background);
-		area2.setForeground(digitColor);
-		area2.setEditable(false);
-		statusButton[0][0] = new JButton("<");
-		statusButton[0][1] = new JButton(">");
-		statusButton[1][0] = new JButton("<");
-		statusButton[1][1] = new JButton(">");
-		for(int i = 0; i < 2; i++){
-			for(int j = 0; j < 2; j++){
-				statusButton[i][j].setBackground(digitColor);
-				statusButton[i][j].setForeground(background);
-				statusButton[i][j].addActionListener(this);
-				statusButton[i][j].setOpaque(true);
-			}
-		}
-		translateStatusPanel = new JPanel();
-		translateStatusPanel.setBackground(background);
-		translateStatusPanel.setLayout(new BorderLayout());
-		JLabel label1 = new JLabel("Infix to Postfix", SwingConstants.CENTER);
-		label1.setFont(new Font("Courier New", Font.BOLD, 12));
-		label1.setForeground(digitColor);
-		translateStatusPanel.add(label1, BorderLayout.NORTH);
-		translateStatusPanel.add(statusButton[0][0], BorderLayout.WEST);
-		JPanel areaPanel = new JPanel();
-		areaPanel.setLayout(new BorderLayout());
-		JTextArea transLabel = new JTextArea(7,8);
-		transLabel.setBackground(background);
-		transLabel.setText("Parsed:\nRead:\nAction:\nCommited:\nStack:");
-		transLabel.setForeground(digitColor);
-		transLabel.setFont(new Font("Courier New", Font.BOLD, 12));
-		areaPanel.add(transLabel, BorderLayout.WEST);
-		areaPanel.add(new JScrollPane(area, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
-		translateStatusPanel.add(areaPanel, BorderLayout.CENTER);
-		translateStatusPanel.add(statusButton[0][1], BorderLayout.EAST);
 		
-		evaluationStatusPanel = new JPanel();
-		evaluationStatusPanel.setBackground(background);
-		evaluationStatusPanel.setLayout(new BorderLayout());
-		JLabel label = new JLabel("Postfix Evaluation", SwingConstants.CENTER);
-		label.setFont(new Font("Courier New", Font.BOLD, 12));
-		label.setForeground(digitColor);
-		evaluationStatusPanel.add(label, BorderLayout.NORTH);
-		evaluationStatusPanel.add(statusButton[1][0], BorderLayout.WEST);
-		JPanel area2Panel = new JPanel();
-		area2Panel.setLayout(new BorderLayout());
-		JTextArea evalLabel = new JTextArea(7,8);
-		evalLabel.setBackground(background);
-		evalLabel.setText("Parsed:\nRead:\nAction:\nStack:");
-		evalLabel.setForeground(digitColor);
-		evalLabel.setFont(new Font("Courier New", Font.BOLD, 12));
-		area2Panel.add(evalLabel, BorderLayout.WEST);
-		area2Panel.add(new JScrollPane(area2, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
-		evaluationStatusPanel.add(area2Panel, BorderLayout.CENTER);
-		evaluationStatusPanel.add(statusButton[1][1], BorderLayout.EAST);
-		south.setLayout(new GridLayout(1,2));
-		south.add(translateStatusPanel);
-		south.add(evaluationStatusPanel);
-
-		add(north, BorderLayout.NORTH);
-		add(south, BorderLayout.SOUTH);
-		add(east, BorderLayout.EAST);
-		add(west, BorderLayout.WEST);
-		add(whole, BorderLayout.CENTER);
+		Font font = new Font("Helvetica", Font.PLAIN, 15);
+		Font font2 = new Font("Helvetica", Font.PLAIN, 20);
+		JPanel resultLabelsPanel = new JPanel(new GridLayout(2,1));
+		resultLabelsPanel.setBackground(background);
+		JLabel transResultLabel = new JLabel("Infix to Postfix Result: ");
+		transResultLabel.setFont(font);
+		transResultLabel.setForeground(digitColor);
+		transResultLabel.setBackground(background);
+		JLabel evalResultLabel = new JLabel("Postfix Evaluation Result: ");
+		evalResultLabel.setFont(font);
+		evalResultLabel.setForeground(digitColor);
+		evalResultLabel.setBackground(background);
+		resultLabelsPanel.add(transResultLabel);
+		resultLabelsPanel.add(evalResultLabel);
+		
+		JPanel resultFieldsPanel = new JPanel(new GridLayout(2,1));
+		resultFieldsPanel.setBackground(background);
+		translateResultField = new JTextField(20);
+		translateResultField.setFont(font2);
+		translateResultField.setForeground(digitColor);
+		translateResultField.setBackground(background);
+		evaluateResultField = new JTextField(20);
+		evaluateResultField.setFont(font2);
+		evaluateResultField.setForeground(digitColor);
+		evaluateResultField.setBackground(background);
+		resultFieldsPanel.add(translateResultField);
+		resultFieldsPanel.add(evaluateResultField);
+		
+		JLabel resultsLabel = new JLabel("Results", SwingConstants.CENTER);
+		resultsLabel.setFont(new Font("Helvetica", Font.PLAIN, 23));
+		resultsLabel.setForeground(digitColor);
+		resultsLabel.setBackground(background);
+		
+		south.setLayout(new BorderLayout());
+		south.add(resultsLabel, BorderLayout.NORTH);
+		south.add(resultLabelsPanel, BorderLayout.WEST);
+		south.add(resultFieldsPanel, BorderLayout.CENTER);
+		
+		calculatorPanel = new JPanel();
+		calculatorPanel.setLayout(new BorderLayout());
+		calculatorPanel.setBackground(background);
+		calculatorPanel.add(north, BorderLayout.NORTH);
+		calculatorPanel.add(south, BorderLayout.SOUTH);
+		calculatorPanel.add(east, BorderLayout.EAST);
+		calculatorPanel.add(west, BorderLayout.WEST);
+		calculatorPanel.add(whole, BorderLayout.CENTER);
 
 		north.setBackground(background);
 		south.setBackground(background);
@@ -206,7 +188,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		setVisible(true);
 		activeWindow = true;
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		setSize(550,500);
+		setSize(width,height);
 		setResizable(false);
 
 		for(int j = 0; j < 20; j++) {
@@ -222,8 +204,45 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 				activeWindow = false;
 			}
 		});
+		
+		translateAnimPanel = new JPanel(new BorderLayout());
+		translateAnimPanel.add(trans, BorderLayout.CENTER);
+		translateAnimPanel.setBackground(background);
+		JLabel tl = new JLabel("Infix to Postfix Animation", SwingConstants.CENTER);
+		tl.setFont(new Font("Helvetica", Font.PLAIN, 18));
+		tl.setForeground(digitColor);
+		translateAnimPanel.add(tl, BorderLayout.NORTH);
+		
+		evaluateAnimPanel = new JPanel(new BorderLayout());
+		evaluateAnimPanel.add(eval, BorderLayout.CENTER);
+		evaluateAnimPanel.setBackground(background);
+		JLabel el = new JLabel("Postfix Evaluation Animation", SwingConstants.CENTER);
+		el.setFont(new Font("Helvetica", Font.PLAIN, 18));
+		el.setForeground(digitColor);
+		evaluateAnimPanel.add(el, BorderLayout.NORTH);
+		
+		translateTabs.addTab("Infix to Postfix Animation", translateAnimPanel);
+		translateTabs.addTab("Infix to Postfix Table", tables.transPanel);
+		translateTabs.setBackground(digitColor);
+		evaluateTabs.addTab("Postfix Evaluation Animation", evaluateAnimPanel);
+		evaluateTabs.addTab("Postfix Evaluation Table", tables.evalPanel);
+		evaluateTabs.setBackground(digitColor);
+		add(calculatorPanel);
+		add(translateTabs);
+		add(evaluateTabs);
+		Dimension dimension = calculatorPanel.getPreferredSize();
+		calculatorPanel.setBounds(0, 0, 655, 612);
+		translateTabs.setBounds(655, 0, 620, 319);
+		evaluateTabs.setBounds(655, 319, 620, 293);
 		repaint();
 		revalidate();
+		
+		animationThread = null;
+		animationThread = new Thread(this);
+		animationThread.start();
+		
+		trans.pausePlay.addActionListener(this);
+		eval.pausePlay.addActionListener(this);
 	}
 
 	public void actionPerformed(ActionEvent event) {
@@ -231,19 +250,25 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 			whole.requestFocus();
 			return;
 		}
+		if(runningAnimation){return;}
+		if(event.getSource() == trans.pausePlay){
+			trans.runSignal = true;
+		}else if(event.getSource() == eval.pausePlay){
+			eval.runSignal = true;
+		}
 		for(int i = 0; i < num.length; i++) {
 			if(event.getSource() == num[i]) {
 				if(num[i].getText() == "C") {
-					area.setText("");
 					text.setText(" ");
 					op = "";
 					break;
 				} else if(num[i].getText() == "=") {
-					area.setText("");
 					PseudoArray<String> postfixed = infixToPostfix(op);
 					op = postfixCalculate(postfixed);
 					text.setText(op);
 					op = "";
+					fontSize = 30;
+					text.setFont(new Font("Helvetica", Font.BOLD, fontSize));
 					break;
 				} else if(num[i].getText() == "DEL") {
 					String screenText = text.getText();
@@ -262,7 +287,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 					}
 					text.setText(" " + screenText.trim());
 					op = screenText;
-					if(text.getText().length()*(fontSize+1) < 910 && fontSize < 30){
+					if(text.getText().length()*(fontSize+1) < 1140 && fontSize < 30){
 						fontSize+=1;
 						text.setFont(new Font("Helvetica", Font.BOLD, fontSize));
 					}
@@ -273,28 +298,8 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 				}
 			}
 		}
-		for(int i = 0; i < 2; i++){
-			for(int j = 0; j < 2; j++){
-				if(event.getSource() == statusButton[i][j]){
-					try{
-						if(i == 0){
-							translateCurr = (j==0?translateCurr-1:translateCurr+1);
-							translateCurr = (translateCurr<0?translateCtr+translateCurr:(translateCurr>=translateCtr?translateCurr-translateCtr:translateCurr));
-							area.setText(listTranslation[translateCurr]);
-							statusButton[0][0].setEnabled(translateCurr==0?false:true);
-							statusButton[0][1].setEnabled(translateCurr+1==translateCtr?false:true);
-						}else{
-							evaluateCurr = (j==0?evaluateCurr-1:evaluateCurr+1);
-							evaluateCurr = (evaluateCurr<0?evaluateCtr+evaluateCurr:(evaluateCurr>=evaluateCtr?evaluateCurr-evaluateCtr:evaluateCurr));
-							area2.setText(listEvaluation[evaluateCurr]);
-							statusButton[1][0].setEnabled(evaluateCurr==0?false:true);
-							statusButton[1][1].setEnabled(evaluateCurr+1==evaluateCtr?false:true);
-						}
-					}catch(NullPointerException exc){}
-				}
-			}
-		}
-		if(text.getText().length()*fontSize >= 910 && fontSize > 12){
+		
+		if(text.getText().length()*fontSize >= 1140 && fontSize > 12){
 			fontSize--;
 			text.setFont(new Font("Helvetica", Font.BOLD, fontSize));
 		}
@@ -302,12 +307,14 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 
 	private class KeyReader extends KeyAdapter{
 		public void keyPressed(KeyEvent e){
+			if(runningAnimation){return;}
 			String pressed = String.valueOf(e.getKeyChar());
 			if(e.getKeyCode() == KeyEvent.VK_ENTER) {
-				area.setText("");
 				PseudoArray<String> postfixed = infixToPostfix(op);
 				op = postfixCalculate(postfixed);
 				text.setText(op);
+				fontSize = 30;
+				text.setFont(new Font("Helvetica", Font.BOLD, fontSize));
 				op = "";
 			} else if(e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
 				String screenText = text.getText();
@@ -327,7 +334,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 				text.setText(" " + screenText.trim());
 				op = screenText;
 				
-				if(text.getText().length()*(fontSize+1) < 910&& fontSize < 30){
+				if(text.getText().length()*(fontSize+1) < 1140 && fontSize < 30){
 					fontSize+=1;
 					text.setFont(new Font("Helvetica", Font.BOLD, fontSize));
 				}
@@ -342,7 +349,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 					text.setText(op);
 				}
 			}
-			if(text.getText().length()*fontSize >= 910 && fontSize > 12){
+			if(text.getText().length()*fontSize >= 1140 && fontSize > 12){
 				fontSize--;
 				text.setFont(new Font("Helvetica", Font.BOLD, fontSize));
 			}
@@ -358,9 +365,10 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		PseudoQueue<String> statusList = new PseudoQueue<>();
 		translateCtr = 0;
 		translateCurr = 0;
-		statusButton[0][0].setEnabled(true);
-		statusButton[0][1].setEnabled(true);
 		infix = infix.trim();
+		if(infix.equals("")){
+			infix = "0";
+		}
 		PseudoStack<Character> operations = new PseudoStack<>();
 		PseudoArray<String> postfix = new PseudoArray<>(infix.length());
 		char top = 0;
@@ -422,13 +430,41 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 				}else if( infix.charAt(i) == ')' ){
 					try{
 						top = operations.pop();
-					}catch(EmptyStackException e){return null;}
-					str += "Pop";
+					}catch(EmptyStackException e){
+						String commit = "";
+						for(int j = 0; j < postfix.size(); j++){
+							commit += postfix.get(j)==null?"":postfix.get(j);
+						}
+						str += "Error! ')' not found!\n";
+						str = infix.substring(0, i+1) + "\n" + str + commit + operations.toString() + "\n";
+						statusList.enqueue(str);
+						translateCtr++;
+						listTranslation = new String[translateCtr];
+						for(int x = 0; x < translateCtr; x++){
+							listTranslation[x] = statusList.dequeue();
+						}
+						return null;
+					}
+					str += "Pop |" + top + "|";
 					while( top != '(' ){
 						postfix.add(String.valueOf(top));
 						try{
 							top = operations.pop();
-						}catch(EmptyStackException e){return null;}
+						}catch(EmptyStackException e){
+							String commit = "";
+							for(int j = 0; j < postfix.size(); j++){
+								commit += postfix.get(j)==null?"":postfix.get(j);
+							}
+							str += ". Error! Stack empty and ')' not found!\n";
+							str = infix.substring(0, i+1) + "\n" + str + commit + operations.toString() + "\n";
+							statusList.enqueue(str);
+							translateCtr++;
+							listTranslation = new String[translateCtr];
+							for(int x = 0; x < translateCtr; x++){
+								listTranslation[x] = statusList.dequeue();
+							}
+							return null;
+						}
 						str += "|" + String.valueOf(top) + "|";
 					}
 					str += " and Commit\n";
@@ -484,8 +520,6 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		for(int i = 0; i < translateCtr; i++){
 			listTranslation[i] = statusList.dequeue();
 		}
-		area.setText(listTranslation[translateCurr]);
-		statusButton[0][0].setEnabled(false);
 		return postfix;
 	}
 	
@@ -494,18 +528,15 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		PseudoQueue<String> statusList = new PseudoQueue<>();
 		evaluateCtr = 0;
 		evaluateCurr = 0;
-		statusButton[1][0].setEnabled(true);
-		statusButton[1][1].setEnabled(true);
 		if(postfix == null){
-			str = "Error Occured!";
+			str = " \n \nError Occured!";
 			statusList.enqueue(str);
 			evaluateCtr++;
 			listEvaluation = new String[evaluateCtr];
 			for(int j = 0; j < evaluateCtr; j++){
 				listEvaluation[j] = statusList.dequeue();
 			}
-			area2.setText(listEvaluation[evaluateCurr]);
-			statusButton[1][0].setEnabled(false);
+			printToCmd();
 			return "Error!";
 		}
 		PseudoStack<Double> numbers = new PseudoStack<>();
@@ -523,7 +554,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 				if(!(postfix.get(i)==null)){
 					double num = Double.parseDouble(postfix.get(i));
 					numbers.push(num);
-					str += num + "\nPush " + num + "\n";
+					str += num + "\nPush |" + num + "|\n";
 				}else{
 					continue;
 				}
@@ -534,22 +565,22 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 					if(postfix.get(i).equals("+")){
 						double num1 = numbers.pop(), num2 = numbers.pop();
 						number = num1+num2;
-						str += "Popped " + num1 + " and " + num2 + " then add. Result: " + number + ". ";
+						str += "Pop |" + num1 + "||" + num2 + "| then add. Result: " + number + ". ";
 					}else if(postfix.get(i).equals("-")){
 						double num1 = numbers.pop(), num2 = numbers.pop();
 						number = num2-num1;
-						str += "Popped " + num1 + " and " + num2 + " then subtract. Result: " + number + ". ";
+						str += "Pop |" + num1 + "||" + num2 + "| then subtract. Result: " + number + ". ";
 					}else if(postfix.get(i).equals("*")){
 						double num1 = numbers.pop(), num2 = numbers.pop();
 						number = num1*num2;
-						str += "Popped " + num1 + " and " + num2 + " then multiply. Result: " + number + ". ";
+						str += "Pop |" + num1 + "||" + num2 + "| then multiply. Result: " + number + ". ";
 					}else if(postfix.get(i).equals("/")){
 						double divisor = numbers.pop(), dividend = numbers.pop();
 						number = dividend/divisor;
 						if(divisor == 0.0){
 							throw new NullPointerException();
 						}
-						str += "Popped " + divisor + " and " + dividend + " then divide. Result: " + number + ". ";
+						str += "Pop |" + divisor + "||" + dividend + "| then divide. Result: " + number + ". ";
 					}else{
 						str += "Error!";
 						statusList.enqueue(str);
@@ -557,8 +588,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 						for(int j = 0; j < evaluateCtr; j++){
 							listEvaluation[j] = statusList.dequeue();
 						}
-						area2.setText(listEvaluation[evaluateCurr]);
-						statusButton[1][0].setEnabled(false);
+						printToCmd();
 						return "Error!";
 					}
 				}catch(NullPointerException ex){
@@ -569,8 +599,7 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 					for(int j = 0; j < evaluateCtr; j++){
 						listEvaluation[j] = statusList.dequeue();
 					}
-					area2.setText(listEvaluation[evaluateCurr]);
-					statusButton[1][0].setEnabled(false);
+					printToCmd();
 					return "Error!";
 				}catch(EmptyStackException exc){
 					str += "Error! Stop Evaluation!";
@@ -580,12 +609,11 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 					for(int j = 0; j < evaluateCtr; j++){
 						listEvaluation[j] = statusList.dequeue();
 					}
-					area2.setText(listEvaluation[evaluateCurr]);
-					statusButton[1][0].setEnabled(false);
+					printToCmd();
 					return "Error!";
 				}
 				numbers.push(number);
-				str += "Push result: "+ number + "\n";
+				str += "Push |"+ number + "|\n";
 			}
 			str += numbers.toString() + "\n";
 			statusList.enqueue(str);
@@ -610,15 +638,19 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		for(int i = 0; i < evaluateCtr; i++){
 			listEvaluation[i] = statusList.dequeue();
 		}
-		area2.setText(listEvaluation[evaluateCurr]);
-		statusButton[1][0].setEnabled(false);
 		printToCmd();
+		evaluateResultField.setText(ret);
 		return ret;
 	}
 	
 	public void printToCmd(){
-		String[][] translateTable = new String[translateCtr][5];
-		String[][] evaluateTable = new String[evaluateCtr][4];
+		try{
+			new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+		}catch(Exception e){}
+		translateTable = null;
+		evaluateTable = null;
+		translateTable = new String[translateCtr][5];
+		evaluateTable = new String[evaluateCtr][4];
 		int[] translateTableWidth = {6,4,6,8,5};
 		int[] evaluateTableWidth = {6,4,6,5};
 		
@@ -626,16 +658,22 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 			for(int j = 0, start = 0, end = 0; j < 5; j++){
 				while(end < listTranslation[i].length() && listTranslation[i].charAt(end) != '\n'){end++;}
 				translateTable[i][j] = listTranslation[i].substring(start, end);
-				//System.out.println("|" + translateTable[i][j] + "|" + i + ", " + j);
 				if(translateTable[i][j].length() > translateTableWidth[j]){
 					translateTableWidth[j] = translateTable[i][j].length();
 				}
 				start = ++end;
+				if(start >= listTranslation[i].length() && translateTable[i][j] == null){
+					translateTable[i][j] = " ";
+				}
 			}
 		}
 		
 		for(int i = 0; i < evaluateCtr; i++){
 			for(int j = 0, start = 0, end = 0; j < 4; j++){
+				if(start >= listEvaluation[i].length() && evaluateTable[i][j] == null){
+					evaluateTable[i][j] = " ";
+					continue;
+				}
 				while(listEvaluation[i].length() > end && listEvaluation[i].charAt(end) != '\n'){end++;}
 				evaluateTable[i][j] = listEvaluation[i].substring(start, end);
 				if(evaluateTable[i][j].length() > evaluateTableWidth[j]){
@@ -644,7 +682,8 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 				start = ++end;
 			}
 		}
-		String spaces = "                                                                                      ";
+		
+		String spaces = "                                                                                                                                                                                                                                                                                                               ";
 		System.out.println("\nInfix To Postfix:");
 		System.out.println("Parsed" + spaces.substring(0, translateTableWidth[0]-6) + "|Read" + spaces.substring(0, translateTableWidth[1]-4) + "|Action" + spaces.substring(0, translateTableWidth[2]-6) + "|Commited" + spaces.substring(0, translateTableWidth[3]-8) + "|Stack" + spaces.substring(0, translateTableWidth[4]-5) + "|");
 		for(int i = 0; i < translateCtr; i++){
@@ -655,12 +694,48 @@ public class CrazyCalculator extends JFrame implements ActionListener{
 		}
 		
 		System.out.println("\nPostfix Evaluation:");
-		System.out.println("Parsed" + spaces.substring(0, evaluateTableWidth[0]-6) + "|Read" + spaces.substring(0, evaluateTableWidth[1]-4) + "|Action" + spaces.substring(0, evaluateTableWidth[2]-6) + "|Stack" + spaces.substring(0, evaluateTableWidth[3]-4));
+		System.out.println("Parsed" + spaces.substring(0, evaluateTableWidth[0]-6) + "|Read" + spaces.substring(0, evaluateTableWidth[1]-4) + "|Action" + spaces.substring(0, evaluateTableWidth[2]-6) + "|Stack" + spaces.substring(0, evaluateTableWidth[3]-5) + "|");
 		for(int i = 0; i < evaluateCtr; i++){
 			for(int j = 0; j < 4; j++){
 				System.out.print(evaluateTable[i][j] + spaces.substring(0,evaluateTableWidth[j]-evaluateTable[i][j].length()) + "|");
 			}
 			System.out.println();
+		}
+		tables.printTable(translateTable, evaluateTable);
+		translateResultField.setText(translateTable[translateCtr-1][3]);
+	}
+	
+	public void run(){
+		while(1==1){
+			System.out.print("");//a magical statement, do not delete, you have been warned
+			if(trans.runSignal){
+				try{
+					runningAnimation = true;
+					trans.clean();
+					trans.pausePlay.setIcon(trans.pauseIcon);
+					trans.play(translateTable);
+				}catch(NullPointerException e){
+					trans.clean();
+				}finally{
+					trans.pausePlay.setIcon(trans.playIcon);
+					runningAnimation = false;
+					trans.runSignal = false;
+				}
+			}
+			if(eval.runSignal){
+				try{
+					runningAnimation = true;
+					eval.clean();
+					eval.pausePlay.setIcon(eval.pauseIcon);
+					eval.play(evaluateTable);
+				}catch(NullPointerException e){
+					eval.clean();
+				}finally{
+					eval.pausePlay.setIcon(eval.playIcon);
+					runningAnimation = false;
+					eval.runSignal = false;
+				}
+			}
 		}
 	}
 }
